@@ -1,3 +1,4 @@
+import { request } from "express";
 import Posts from "../models/post_models.js";
 
 export const postList = async (req, res) => {
@@ -38,10 +39,36 @@ export const postCreate = async (req, res) => {
   });
 };
 
-export const postUpdate = (req, res) => {
-  res.send("I'm post update");
+export const postUpdate = async (req, res) => {
+  const { id } = req.params;
+  const post = await Posts.findById(id)
+
+  post.title = req.body.title ?? post.title
+  post.author = req.body.author ?? post.author
+  post.viewer = req.body.viewer ?? post.viewer
+  post.description = req.body.description ?? post.description
+  await post.save()
+  return res.status(200).json({
+    success: true,
+    message: "Post update successfully!",
+    post: {
+      id: post.id,
+      title: post.title,
+      viewer: post.viewer,
+      author: post.author,
+      description: post.description,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    },
+  });
 };
 
-export const postDelete = (req, res) => {
-  res.send("I'm post delete");
+export const postDelete = async (req, res) => {
+  const { id } = req.params;
+  const post = await Posts.findById(id)
+  await post.deleteOne()
+  return res.status(200).json({
+    success: true,
+    message: "Post delete successfully!"
+  })
 };
